@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f3328" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Game Skild" />
+    <title>Game Skild</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Protótipo acadêmico</p>
+        <h1>Game Skild</h1>
+      </div>
+      <div class="topbar-actions">
+        <button id="notifyButton" type="button">Ativar notificações</button>
+        <button id="seedButton" type="button">Carregar exemplos</button>
+      </div>
+    </header>
+
+    <div id="liveToast" class="live-toast" role="status" aria-live="polite" hidden></div>
+
+    <main class="layout">
+      <section class="notice">
+        <strong>Aviso:</strong> use apenas dados e mensagens simuladas. Este sistema não substitui supervisão humana,
+        investigação adequada, apoio psicológico, jurídico ou mecanismos oficiais de denúncia.
+      </section>
+
+      <section class="mobile-access panel" aria-label="Acesso pelo celular">
+        <div>
+          <p class="eyebrow dark">Teste no celular</p>
+          <h2>Abrir na mesma Wi‑Fi</h2>
+          <p>Com o servidor ligado, abra um dos endereços abaixo no navegador do celular.</p>
+        </div>
+        <div id="mobileUrls" class="url-list">
+          <span>Carregando endereço da rede...</span>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Resumo de riscos">
+        <article>
+          <span id="childrenCount">0</span>
+          <p>Crianças cadastradas</p>
+        </article>
+        <article>
+          <span id="alertsCount">0</span>
+          <p>Alertas gerados</p>
+        </article>
+        <article>
+          <span id="highRiskCount">0</span>
+          <p>Riscos altos</p>
+        </article>
+      </section>
+
+      <section class="forms">
+        <form id="childForm" class="panel">
+          <h2>Cadastro simulado</h2>
+          <label>
+            Nome da criança fictícia
+            <input name="child_name" placeholder="Ex.: Criança Simulada" required />
+          </label>
+          <label>
+            Responsável fictício
+            <input name="responsible_name" placeholder="Ex.: Responsável Simulado" required />
+          </label>
+          <label>
+            Idade simulada
+            <input name="age" type="number" min="1" max="17" placeholder="11" />
+          </label>
+          <button type="submit">Cadastrar</button>
+        </form>
+
+        <form id="messageForm" class="panel">
+          <h2>Registrar conversa</h2>
+          <label>
+            Criança
+            <select name="child_id" id="childSelect" required></select>
+          </label>
+          <label>
+            Nome do jogador
+            <input name="sender_name" placeholder="Ex.: Jogador123" required />
+          </label>
+          <label>
+            Tipo de usuário
+            <select name="sender_type">
+              <option value="desconhecido">Desconhecido</option>
+              <option value="jogador">Jogador</option>
+              <option value="moderador">Moderador</option>
+              <option value="adulto_suspeito">Adulto suspeito</option>
+            </select>
+          </label>
+          <label>
+            Jogo
+            <input name="game" placeholder="Ex.: Arena Escolar" />
+          </label>
+          <label>
+            Mensagem simulada
+            <textarea name="message" rows="4" placeholder="Digite uma mensagem fictícia para análise" required></textarea>
+          </label>
+          <button type="submit">Analisar e registrar</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Alertas</h2>
+          <p>Mensagens classificadas como risco médio ou alto.</p>
+        </div>
+        <div id="alertsList" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Histórico de mensagens</h2>
+          <p>Relatório simples com data, usuário, mensagem e nível de risco.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Usuario</th>
+                <th>Jogo</th>
+                <th>Mensagem</th>
+                <th>Risco</th>
+                <th>Acao sugerida</th>
+              </tr>
+            </thead>
+            <tbody id="messagesTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

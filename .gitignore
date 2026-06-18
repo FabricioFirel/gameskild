@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+backend/.deps/
+data/database.json
+data/learning_data.json
+data/vapid.json
+data/push_subscriptions.json
+.pytest_cache/
+.mypy_cache/
+
+# Materiais da apresentacao (mantidos apenas localmente, fora do repositorio)
+apresentacao/
