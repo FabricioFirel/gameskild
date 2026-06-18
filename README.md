@@ -23,18 +23,24 @@ O Guardião Gamer propõe uma aplicação capaz de identificar indícios de:
 .
 ├── backend/
 │   ├── analyzer.py          # classificador de risco por regras (NLP explicavel)
+│   ├── classifier.py        # modelo de aprendizado de maquina (Naive Bayes) que aprende
+│   ├── notifications.py     # notificacoes em tempo real (SSE) e Web Push (VAPID)
 │   ├── app.py               # API Flask + entrega do frontend
 │   ├── evaluate.py          # metricas (matriz de confusao, precisao, recall, F1)
 │   ├── test_analyzer.py     # testes automatizados (unittest)
 │   └── requirements.txt
 ├── data/
 │   ├── simulated_messages.json   # base rotulada ficticia (segura/suspeita/perigosa)
-│   └── database.json             # dados gerados na execucao (gitignore)
+│   ├── learning_data.json        # correcoes humanas aprendidas (gitignore)
+│   ├── database.json             # dados gerados na execucao (gitignore)
+│   ├── vapid.json                # chaves de Web Push (gitignore)
+│   └── push_subscriptions.json   # inscricoes de notificacao (gitignore)
 ├── docs/
 │   └── projeto_academico.md
 ├── frontend/
 │   ├── app.js
 │   ├── index.html
+│   ├── sw.js                # service worker (Web Push)
 │   ├── manifest.webmanifest
 │   ├── generate_icons.py    # gera os icones PWA (escudo)
 │   ├── icon-192.png
@@ -47,8 +53,9 @@ O Guardião Gamer propõe uma aplicação capaz de identificar indícios de:
 
 - Python 3
 - Flask
-- HTML, CSS e JavaScript
-- Classificador inicial por regras, palavras-chave e padrões simples de NLP
+- HTML, CSS e JavaScript (PWA)
+- Análise híbrida: regras explicáveis de NLP + modelo de aprendizado de máquina (Naive Bayes em Python puro) que melhora com as correções humanas
+- Notificações em tempo real: Server-Sent Events (app aberto) e Web Push/VAPID (app fechado)
 
 ## Instalação
 
@@ -163,15 +170,72 @@ Content-Type: application/json
 GET /api/alerts
 ```
 
-## Como o classificador funciona
+### Ensinar o modelo (correção humana)
 
-O módulo `backend/analyzer.py` normaliza a mensagem, procura padrões suspeitos e soma pesos por categoria. A pontuação final vai de 0 a 100:
+Quando o responsável confirma ou corrige o nível de um alerta, o exemplo entra na base
+de aprendizado e o modelo é re-treinado na hora.
 
-- 0 a 34: risco baixo.
-- 35 a 69: risco médio.
-- 70 a 100: risco alto.
+```http
+POST /api/feedback
+Content-Type: application/json
 
-Mensagens de risco alto recebem recomendação de bloqueio ou retenção para revisão humana.
+{
+  "message": "vamos manter isso em segredo",
+  "level": "alto"
+}
+```
+
+### Estado do modelo
+
+```http
+GET /api/model
+```
+
+### Notificações em tempo real (SSE)
+
+```http
+GET /api/stream
+```
+
+### Web Push (app fechado)
+
+```http
+GET  /api/push/public-key      # chave pública VAPID
+POST /api/push/subscribe       # registra a inscrição do navegador
+POST /api/push/test            # dispara uma notificação de teste
+```
+
+## Como a análise funciona
+
+A classificação combina duas camadas:
+
+1. **Regras explicáveis** (`backend/analyzer.py`): normaliza a mensagem, procura padrões
+   suspeitos e soma pesos por categoria. A pontuação vai de 0 a 100:
+   - 0 a 34: risco baixo.
+   - 35 a 69: risco médio.
+   - 70 a 100: risco alto.
+2. **Aprendizado de máquina** (`backend/classifier.py`): um Naive Bayes treinado na base
+   simulada e nas correções humanas estima o nível de risco de forma independente.
+
+O nível final é o **mais severo** entre as duas camadas. Quando o modelo eleva o risco,
+isso é registrado em `risk_source` e os termos mais influentes são destacados, mantendo a
+decisão transparente. Mensagens de risco alto recebem recomendação de bloqueio ou retenção
+para revisão humana.
+
+### Como o modelo aprende com o que acontece
+
+O classificador começa treinado com `data/simulated_messages.json`. A cada correção enviada
+em `/api/feedback`, o exemplo é gravado em `data/learning_data.json` e o modelo é re-treinado
+imediatamente — então o sistema melhora conforme os responsáveis revisam os alertas.
+
+## Notificações
+
+- **Tempo real (app aberto):** o painel mantém uma conexão SSE (`/api/stream`) e, ao surgir
+  um alerta de risco médio ou alto, mostra um aviso na hora e dispara uma notificação do
+  navegador.
+- **App fechado / celular bloqueado:** com o botão **Ativar notificações**, o navegador
+  registra o service worker (`frontend/sw.js`) e uma inscrição de Web Push. Requer HTTPS ou
+  `localhost` (o navegador bloqueia Web Push em HTTP de rede comum).
 
 ## Testes automatizados
 
@@ -235,7 +299,7 @@ Referências úteis:
 ## Limitações
 
 - O sistema usa mensagens simuladas.
-- O classificador inicial é baseado em regras, não em um modelo treinado.
+- O modelo de aprendizado de máquina é simples (Naive Bayes) e depende da qualidade e do tamanho da base; com poucos exemplos pode generalizar mal.
 - Pode haver falsos positivos e falsos negativos.
 - Não há integração real com jogos online.
 - O sistema não identifica automaticamente a idade real dos usuários.
@@ -246,8 +310,10 @@ Referências úteis:
 - [x] Criar base rotulada simulada (`data/simulated_messages.json`).
 - [x] Criar testes automatizados (`backend/test_analyzer.py`).
 - [x] Criar avaliação com métricas (`backend/evaluate.py`).
+- [x] Treinar um classificador de aprendizado de máquina que melhora com as correções humanas (`backend/classifier.py`).
+- [x] Notificações em tempo real (SSE) e Web Push para responsáveis.
 - [ ] Ampliar a base rotulada com mais exemplos revisados.
-- [ ] Treinar classificador com scikit-learn, spaCy ou transformers usando a base atual como ponto de partida.
+- [ ] Evoluir o modelo para scikit-learn, spaCy ou transformers usando a base atual como ponto de partida.
 - [ ] Adicionar autenticação e perfis de responsáveis.
 - [ ] Trocar JSON local por banco de dados.
 - [ ] Implementar exportação de relatórios.
