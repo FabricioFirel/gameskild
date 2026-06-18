@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f3328" />
+    <title>Game Skild — Demo</title>
+    <!--
+      VERSÃO DEMO (GitHub Pages): roda inteira no navegador, sem backend.
+      A análise de risco e o aprendizado de máquina foram portados para
+      JavaScript; os dados ficam no localStorage. A versão completa, com
+      backend Flask, notificações em tempo real (SSE) e Web Push, está em
+      backend/ e frontend/ — rode com `python app.py`.
+    -->
+    <style>
+      :root {
+        --bg: #f6f8f7; --panel: #fff; --ink: #17211d; --muted: #5d6b64;
+        --line: #dce4df; --brand: #157f5b; --brand-dark: #0e6045;
+        --low: #2f855a; --medium: #b7791f; --high: #c53030;
+        --soft-green: #e8f5ef; --soft-yellow: #fff7df; --soft-red: #fff0f0;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink);
+        font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif; }
+      button, input, select, textarea { font: inherit; }
+      button { border: 0; border-radius: 8px; background: var(--brand); color: #fff;
+        cursor: pointer; font-weight: 700; min-height: 44px; padding: .78rem 1rem; }
+      button:hover { background: var(--brand-dark); }
+      .topbar { align-items: center; background: #0f3328; color: #fff; display: flex;
+        justify-content: space-between; gap: 1rem; padding: 1.1rem clamp(1rem,4vw,2.5rem); flex-wrap: wrap; }
+      .topbar h1, .topbar p { margin: 0; }
+      .eyebrow { color: #bfe6d5; font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+      .eyebrow.dark { color: var(--brand-dark); }
+      .layout { display: grid; gap: 1rem; margin: 0 auto; max-width: 1180px; padding: 1rem; }
+      .notice { background: var(--soft-yellow); border: 1px solid #f0d58a; border-radius: 8px; color: #65480c; padding: .95rem 1rem; }
+      .notice.demo { background: var(--soft-green); border-color: #b9dfcf; color: var(--brand-dark); }
+      .stats, .forms { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .forms { grid-template-columns: minmax(260px,.75fr) minmax(280px,1.25fr); }
+      .stats article, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+      .stats article { padding: 1rem; }
+      .stats span { color: var(--brand-dark); display: block; font-size: 2rem; font-weight: 800; line-height: 1; }
+      .stats p { color: var(--muted); margin: .45rem 0 0; }
+      .panel { padding: 1rem; }
+      .panel h2 { margin: 0 0 1rem; }
+      form { display: grid; gap: .85rem; }
+      label { color: var(--muted); display: grid; gap: .35rem; font-size: .92rem; font-weight: 700; }
+      input, select, textarea { border: 1px solid var(--line); border-radius: 8px; color: var(--ink);
+        font-size: 1rem; min-height: 44px; padding: .75rem; width: 100%; }
+      textarea { resize: vertical; }
+      .section-title { align-items: baseline; display: flex; justify-content: space-between; gap: 1rem; }
+      .section-title h2, .section-title p { margin: 0; }
+      .section-title p { color: var(--muted); }
+      .list { display: grid; gap: .75rem; margin-top: 1rem; }
+      .alert { border: 1px solid var(--line); border-left: 6px solid var(--medium); border-radius: 8px; padding: .85rem; }
+      .alert.high { background: var(--soft-red); border-left-color: var(--high); }
+      .alert.medium { background: var(--soft-yellow); border-left-color: var(--medium); }
+      .alert header { align-items: center; display: flex; justify-content: space-between; gap: .75rem; }
+      .alert h3, .alert p { margin: 0; }
+      .alert p { color: var(--muted); margin-top: .5rem; }
+      .tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .7rem; }
+      .tag, .risk { border-radius: 999px; display: inline-flex; font-size: .78rem; font-weight: 800; padding: .25rem .55rem; }
+      .tag { background: #e9eeeb; color: #34423b; }
+      .tag.ml { background: #dfeaff; color: #1f3a8a; }
+      .risk.low { background: var(--soft-green); color: var(--low); }
+      .risk.medium { background: var(--soft-yellow); color: var(--medium); }
+      .risk.high { background: var(--soft-red); color: var(--high); }
+      .table-wrap { margin-top: 1rem; overflow-x: auto; }
+      table { border-collapse: collapse; min-width: 760px; width: 100%; }
+      th, td { border-bottom: 1px solid var(--line); padding: .7rem; text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: .8rem; text-transform: uppercase; }
+      mark { background: #ffed99; border-radius: 4px; padding: 0 .15rem; }
+      .empty { color: var(--muted); padding: .5rem 0; }
+      .feedback { align-items: center; border-top: 1px dashed var(--line); display: flex; flex-wrap: wrap;
+        gap: .45rem; margin-top: .8rem; padding-top: .7rem; }
+      .feedback-label { color: var(--muted); font-size: .85rem; font-weight: 700; margin-right: .25rem; }
+      button.fb { background: var(--brand); border-radius: 999px; font-size: .82rem; min-height: 0; padding: .35rem .8rem; }
+      button.fb.alt { background: #eef2f0; color: #34423b; }
+      button.fb.alt:hover { background: #dfe7e3; }
+      button.fb:disabled { cursor: default; opacity: .55; }
+      #notifyArea { color: #bfe6d5; font-size: .85rem; font-weight: 700; }
+      .live-toast { background: var(--brand-dark); border-radius: 8px; bottom: 1rem; color: #fff; font-weight: 700;
+        left: 50%; max-width: 92vw; opacity: 0; padding: .85rem 1.1rem; position: fixed;
+        transform: translate(-50%, 1rem); transition: opacity .2s, transform .2s; z-index: 50;
+        box-shadow: 0 8px 24px rgba(15,51,40,.25); }
+      .live-toast.show { opacity: 1; transform: translate(-50%, 0); }
+      @media (max-width: 760px) {
+        .stats, .forms { grid-template-columns: 1fr; }
+        table { min-width: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Protótipo acadêmico • versão demo</p>
+        <h1>Game Skild</h1>
+      </div>
+      <button id="seedButton" type="button">Carregar exemplos</button>
+    </header>
+
+    <div id="liveToast" class="live-toast" role="status" aria-live="polite" hidden></div>
+
+    <main class="layout">
+      <section class="notice demo">
+        <strong>Modo demo:</strong> esta página roda inteira no navegador (sem servidor). A análise de risco e o
+        aprendizado de máquina foram portados para JavaScript. A versão completa, com backend, notificações em tempo
+        real e Web Push, está no repositório (<code>python app.py</code>). Use apenas mensagens simuladas.
+      </section>
+
+      <section class="stats" aria-label="Resumo de riscos">
+        <article><span id="childrenCount">0</span><p>Crianças cadastradas</p></article>
+        <article><span id="alertsCount">0</span><p>Alertas gerados</p></article>
+        <article><span id="highRiskCount">0</span><p>Riscos altos</p></article>
+      </section>
+
+      <section class="forms">
+        <form id="childForm" class="panel">
+          <h2>Cadastro simulado</h2>
+          <label>Nome da criança fictícia
+            <input name="child_name" placeholder="Ex.: Criança Simulada" required /></label>
+          <label>Responsável fictício
+            <input name="responsible_name" placeholder="Ex.: Responsável Simulado" required /></label>
+          <label>Idade simulada
+            <input name="age" type="number" min="1" max="17" placeholder="11" /></label>
+          <button type="submit">Cadastrar</button>
+        </form>
+
+        <form id="messageForm" class="panel">
+          <h2>Registrar conversa</h2>
+          <label>Criança
+            <select name="child_id" id="childSelect" required></select></label>
+          <label>Nome do jogador
+            <input name="sender_name" placeholder="Ex.: Jogador123" required /></label>
+          <label>Tipo de usuário
+            <select name="sender_type">
+              <option value="desconhecido">Desconhecido</option>
+              <option value="jogador">Jogador</option>
+              <option value="moderador">Moderador</option>
+              <option value="adulto_suspeito">Adulto suspeito</option>
+            </select></label>
+          <label>Jogo
+            <input name="game" placeholder="Ex.: Arena Escolar" /></label>
+          <label>Mensagem simulada
+            <textarea name="message" rows="4" placeholder="Digite uma mensagem fictícia para análise" required></textarea></label>
+          <button type="submit">Analisar e registrar</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-title"><h2>Alertas</h2><p>Mensagens classificadas como risco médio ou alto.</p></div>
+        <div id="alertsList" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title"><h2>Histórico de mensagens</h2><p>Data, usuário, mensagem e nível de risco.</p></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Usuario</th><th>Jogo</th><th>Mensagem</th><th>Risco</th><th>Acao sugerida</th></tr></thead>
+            <tbody id="messagesTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="demo/engine.js"></script>
+    <script src="demo/app.js"></script>
+  </body>
+</html>
