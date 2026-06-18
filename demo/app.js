@@ -228,7 +228,7 @@
     saveLearning(learning);
     trainModel();
     btn.disabled = true;
-    showToast('Modelo atualizado: aprendeu "' + riskLabel(btn.dataset.level) + '".');
+    showToast("O Game Skild aprendeu com a sua correção.");
   });
 
   $("#seedButton").addEventListener("click", function () {

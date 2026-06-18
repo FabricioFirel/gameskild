@@ -4,14 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0f3328" />
-    <title>Game Skild — Demo</title>
-    <!--
-      VERSÃO DEMO (GitHub Pages): roda inteira no navegador, sem backend.
-      A análise de risco e o aprendizado de máquina foram portados para
-      JavaScript; os dados ficam no localStorage. A versão completa, com
-      backend Flask, notificações em tempo real (SSE) e Web Push, está em
-      backend/ e frontend/ — rode com `python app.py`.
-    -->
+    <title>Game Skild</title>
     <style>
       :root {
         --bg: #f6f8f7; --panel: #fff; --ink: #17211d; --muted: #5d6b64;
@@ -92,7 +85,7 @@
   <body>
     <header class="topbar">
       <div>
-        <p class="eyebrow">Protótipo acadêmico • versão demo</p>
+        <p class="eyebrow">Segurança infantil em jogos online</p>
         <h1>Game Skild</h1>
       </div>
       <button id="seedButton" type="button">Carregar exemplos</button>
@@ -102,9 +95,9 @@
 
     <main class="layout">
       <section class="notice demo">
-        <strong>Modo demo:</strong> esta página roda inteira no navegador (sem servidor). A análise de risco e o
-        aprendizado de máquina foram portados para JavaScript. A versão completa, com backend, notificações em tempo
-        real e Web Push, está no repositório (<code>python app.py</code>). Use apenas mensagens simuladas.
+        <strong>Como usar:</strong> cadastre uma criança fictícia, registre uma mensagem de exemplo e veja o Game Skild
+        avaliar o risco, destacar os trechos suspeitos e gerar um alerta para o responsável. Para ver tudo preenchido
+        na hora, clique em <strong>Carregar exemplos</strong>. Use apenas mensagens fictícias.
       </section>
 
       <section class="stats" aria-label="Resumo de riscos">
