@@ -230,6 +230,14 @@
     saveStore(state); e.target.reset(); render();
   });
 
+  $("#messageForm").addEventListener("click", function (e) {
+    var ex = e.target.closest("button.ex");
+    if (!ex) return;
+    var ta = $("#messageForm textarea[name=message]");
+    ta.value = ex.dataset.msg;
+    ta.focus();
+  });
+
   $("#alertsList").addEventListener("click", function (e) {
     var btn = e.target.closest("button.fb");
     if (!btn) return;

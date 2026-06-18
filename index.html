@@ -70,6 +70,11 @@
       button.fb.alt { background: #eef2f0; color: #34423b; }
       button.fb.alt:hover { background: #dfe7e3; }
       button.fb:disabled { cursor: default; opacity: .55; }
+      .examples { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; }
+      .examples-label { color: var(--muted); font-size: .85rem; font-weight: 700; margin-right: .25rem; }
+      button.ex { background: #eef2f0; border: 1px solid var(--line); border-radius: 999px;
+        color: #34423b; font-size: .82rem; min-height: 0; padding: .35rem .8rem; }
+      button.ex:hover { background: #dfe7e3; }
       #notifyArea { color: #bfe6d5; font-size: .85rem; font-weight: 700; }
       .live-toast { background: var(--brand-dark); border-radius: 8px; bottom: 1rem; color: #fff; font-weight: 700;
         left: 50%; max-width: 92vw; opacity: 0; padding: .85rem 1.1rem; position: fixed;
@@ -135,6 +140,12 @@
             <input name="game" placeholder="Ex.: Arena Escolar" /></label>
           <label>Mensagem simulada
             <textarea name="message" rows="4" placeholder="Digite uma mensagem fictícia para análise" required></textarea></label>
+          <div class="examples">
+            <span class="examples-label">Experimente clicar:</span>
+            <button type="button" class="ex" data-msg="Boa partida! Vamos jogar de novo mais tarde?">mensagem segura</button>
+            <button type="button" class="ex" data-msg="Passa seu instagram pra gente conversar fora do jogo.">mensagem suspeita</button>
+            <button type="button" class="ex" data-msg="Manda uma foto sua e não conta pra seus pais, é segredo.">mensagem perigosa</button>
+          </div>
           <button type="submit">Analisar e registrar</button>
         </form>
       </section>
