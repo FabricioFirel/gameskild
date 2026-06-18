@@ -57,6 +57,16 @@
 
   var state = loadStore() || { children: [], messages: [], alerts: [] };
 
+  // Já deixa uma criança fictícia pronta para que o usuário consiga registrar
+  // uma mensagem imediatamente, sem precisar cadastrar nada antes.
+  function ensureDefaultChild() {
+    if (!state.children.length) {
+      state.children.push({ id: "crianca-exemplo", child_name: "Criança Simulada",
+        responsible_name: "Responsável Simulado", age: 11, created_at: new Date().toISOString() });
+      saveStore(state);
+    }
+  }
+
   // ---- Modelo (treina com a base + correções aprendidas) ----
   var model = new GS.NaiveBayes();
   function trainModel() {
@@ -253,5 +263,6 @@
     showToast("Exemplos carregados.");
   });
 
+  ensureDefaultChild();
   render();
 })();
